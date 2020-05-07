@@ -35,23 +35,28 @@ class Gui:
         self.dst_src = tk.IntVar()
         self.speed = tk.IntVar()
         self.evaluation = tk.IntVar()
+        self.change_type = tk.IntVar()
 
         self.city_count = 0
         self.conn_count = 0
         self.selected_cities = []
         self.ovals = []
-        self.distances = []
         self.lines = []
-        self.city_dict = {"City1": "Paris", "City2": "Lion", "Distance": 0}
+        self.gonna_move = -1
+        self.gonna_move_cons = []
+        self.city = {
+                    "coords": (0, 0),
+                    "name": "London"
+        }
 
         self.cities = ["Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Strasbourg", "Montpeiller",
-                       "Bordeaux", "Lille", "Rennas", "Reims", "Le Havre", "Toulon", "Grenoble", "Dijon", "Angers",
-                       "Villeaurbanne", "Le Mans", "Saint-Denis"]
+                       "Bordeaux", "Lille", "Rennas", "Reims", "Le_Havre", "Toulon", "Grenoble", "Dijon", "Angers",
+                       "Villeaurbanne", "Le_Mans", "Saint-Denis"]
         self.colors = ["red", "blue", "purple", "brown", "green", "hot pink", "orange red", "black", "cyan",
                        "deep pink", "green3", "DodgerBlue3", "firebrick4", "LightPink4", "maroon", "SeaGreen3",
-                       "lime green", "navy", "dark violet", "red4", "magenta2"]
+                       "lime green", "navy", "dark violet", "red4"]
 
-        header = tk.Label(self.frame, text="Create Map", font='Calibri 14 bold', fg=self.h_color, bg=self.bg_color)
+        header = tk.Label(self.frame, text="Create Map", font='Calibri 12 bold', fg=self.h_color, bg=self.bg_color)
         header.grid(column=0, row=0)
         section = tk.Label(self.frame, text="Number of Cities", font='Calibri 12 bold', fg=self.s_color,
                            bg=self.bg_color)
@@ -75,43 +80,60 @@ class Gui:
                                    command=self.create_randomly, bg=self.bg_color).grid(column=0, row=8)
         frame_us = tk.Radiobutton(self.frame, text='User Input', variable=self.input_type, value="User",
                                   command=self.add_buttons, bg=self.bg_color).grid(column=0, row=9)
+        section3 = tk.Label(self.frame, text="Cities and Connections", font='Calibri 12 bold', fg=self.s_color,
+                            bg=self.bg_color)
+        section3.grid(column=0, row=10)
+        city = tk.Radiobutton(self.frame, text="Add City", variable=self.city_or_conn, command=self.binder, value=0,
+                              bg=self.bg_color).grid(column=0, row=11)
+        connection = tk.Radiobutton(self.frame, text="Make Connection", variable=self.city_or_conn, command=self.binder,
+                                    value=1, bg=self.bg_color).grid(column=0, row=12)
+        section4 = tk.Label(self.frame, text="Change Map", font='Calibri 12 bold', fg=self.s_color, bg=self.bg_color)
+        section4.grid(column=0, row=13)
 
-        header2 = tk.Label(self.frame, text="Algorithms", font='Calibri 14 bold', fg=self.h_color, bg=self.bg_color)
-        header2.grid(column=0, row=13)
+        move_city = tk.Radiobutton(self.frame, text='Move City', variable=self.change_type, value=0,
+                                   command=self.change_map, bg=self.bg_color).grid(column=0, row=14)
+        delete_city = tk.Radiobutton(self.frame, text='Delete City', variable=self.change_type, value=1,
+                                     command=self.change_map, bg=self.bg_color).grid(column=0, row=15)
+        delete_conn = tk.Radiobutton(self.frame, text='Delete Connection', variable=self.change_type, value=2,
+                                     command=self.change_map, bg=self.bg_color).grid(column=0, row=16)
+
+        header2 = tk.Label(self.frame, text="Algorithms", font='Calibri 12 bold', fg=self.h_color, bg=self.bg_color)
+        header2.grid(column=0, row=17)
 
         alg1 = tk.Radiobutton(self.frame, text='A* Search', variable=self.algorithm, value=0,
-                              bg=self.bg_color).grid(column=0, row=14)
+                              bg=self.bg_color).grid(column=0, row=18)
         alg2 = tk.Radiobutton(self.frame, text='Best First Search', variable=self.algorithm, value=1,
-                              bg=self.bg_color).grid(column=0, row=15)
+                              bg=self.bg_color).grid(column=0, row=19)
         alg3 = tk.Radiobutton(self.frame, text='Depth First Search', variable=self.algorithm, value=2,
-                              bg=self.bg_color).grid(column=0, row=16)
+                              bg=self.bg_color).grid(column=0, row=20)
         alg4 = tk.Radiobutton(self.frame, text='Breadth First Search', variable=self.algorithm, value=3,
-                              bg=self.bg_color).grid(column=0, row=17)
+                              bg=self.bg_color).grid(column=0, row=21)
         section4 = tk.Label(self.frame, text="Evaluation Function", font='Calibri 12 bold', fg=self.s_color,
                             bg=self.bg_color)
-        section4.grid(column=0, row=18)
+        section4.grid(column=0, row=22)
         euclidean = tk.Radiobutton(self.frame, text='Euclidean', variable=self.evaluation, value=0, bg=self.bg_color). \
-            grid(column=0, row=19, sticky='w')
+            grid(column=0, row=23, sticky='w')
         manhattan = tk.Radiobutton(self.frame, text='Manhattan', variable=self.evaluation, value=1, bg=self.bg_color). \
-            grid(column=0, row=19, sticky='e')
+            grid(column=0, row=23, sticky='e')
         section3 = tk.Label(self.frame, text="Animation Speed", font='Calibri 12 bold', fg=self.s_color,
                             bg=self.bg_color)
-        section3.grid(column=0, row=20)
+        section3.grid(column=0, row=24)
         fast = tk.Radiobutton(self.frame, text='Fast', variable=self.speed, value=0, bg=self.bg_color).\
-            grid(column=0, row=21, sticky='w')
+            grid(column=0, row=25, sticky='w')
         slow = tk.Radiobutton(self.frame, text='Slow', variable=self.speed, value=1, bg=self.bg_color).\
-            grid(column=0, row=21, sticky='e')
+            grid(column=0, row=25, sticky='e')
 
         city_button = tk.Button(self.frame, text="Select Cities", bg=self.s_color, fg=self.h_color,
-                                font='Calibri 12 bold', command=self.select_cities).grid(column=0, row=22,
-                                                                                         sticky='nsew', padx=2)
+                                font='Calibri 12 bold', command=self.select_cities).grid(column=0, row=26,
+                                                                                         sticky='e', padx=2)
         restart_button = tk.Button(self.frame, text="Restart", bg="firebrick1", fg=self.h_color,
                                    font='Calibri 12 bold', command=self.refresh_canvas).grid(column=0,
-                                                                                             row=23, sticky='w')
-        continue_button = tk.Button(self.frame, text="Continue", bg=self.s_color, fg=self.h_color,
-                                    font='Calibri 12 bold', command=self.load_same).grid(column=0, row=23, sticky='e')
+                                                                                             row=26, sticky='w')
+        header3 = tk.Label(self.frame, text="Outputs", font='Calibri 12 bold', fg=self.h_color, bg=self.bg_color)
+        header3.grid(column=0, row=28)
 
-
+        self.output_label = tk.Label(self.frame, fg=self.h_color, bg=self.bg_color, font='Calibri 12 bold')
+        self.output_label.grid(column=0, row=29)
 
         self.step_label = tk.Label(self.window, fg=self.h_color, bg=self.bg_color, font='Calibri 16 bold')
         self.step_label.grid(column=1, row=1)
@@ -125,12 +147,14 @@ class Gui:
         button.grid(column=1, row=6)'''
 
     def refresh_canvas(self):
+        self.cities = ["Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Strasbourg", "Montpeiller",
+                       "Bordeaux", "Lille", "Rennas", "Reims", "Le_Havre", "Toulon", "Grenoble", "Dijon", "Angers",
+                       "Villeaurbanne", "Le_Mans", "Saint-Denis"]
         self.canvas.delete("all")
         self.ovals = []
         self.city_count = 0
         self.conn_count = 0
         self.selected_cities = []
-        self.distances = []
         self.lines = []
         self.canvas.create_line(20, 20, 20, 680, fill="gray")
         self.canvas.create_line(20, 20, 680, 20, fill="gray")
@@ -145,22 +169,34 @@ class Gui:
         self.canvas.create_line(20, 20, 680, 20, fill="gray")
         self.canvas.create_line(680, 20, 680, 680, fill="gray")
         self.canvas.create_line(680, 680, 20, 680, fill="gray")
+        self.step_label.config(text=" ")
+        self.output_label.config(text=" ")
 
         for i in range(len(self.ovals)):
-            x, y = self.ovals[i]
+            x, y = self.ovals[i]["coords"]
             self.canvas.create_oval(x, y, x + 10, y + 10, fill=self.c_color, outline=self.c_color)
-            self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text=self.cities[self.city_count])
+            if self.cities[self.city_count] == "Le_Havre":
+                self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text="Le Havre",
+                                        tag=self.cities[self.city_count] + "_text")
+            elif self.cities[self.city_count] == "Le_Mans":
+                self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text="Le Mans",
+                                        tag=self.cities[self.city_count] + "_text")
+            else:
+                self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10",
+                                        text=self.cities[self.city_count],
+                                        tag=self.cities[self.city_count] + "_text")
             self.city_count += 1
 
         for i in range(len(self.lines)):
-            x1, y1, x2, y2 = self.lines[i]
+            x1, y1, x2, y2 = self.lines[i]["coords"]
             j = random.randint(0, len(self.colors) - 1)
             self.canvas.create_line(x1, y1, x2, y2, fill=self.colors[j])
             self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, fill=self.colors[j], font="Calibri 10",
-                                    text=str(int(euclidean_distance(x1, y1, x2, y2))))
+                                    text=str(int(distance(x1, y1, x2, y2))))
             self.conn_count += 1
 
     def select_cities(self):
+        self.load_same()
         self.canvas.unbind("<Button-1>")
         self.canvas.bind("<Button-1>", self.dst_and_src)
         self.selected_cities = []
@@ -171,48 +207,180 @@ class Gui:
         msg.showinfo(title="Number of Connections", message="Number of connections must be between {} and {}."
                      .format(c - 1, int(c*(c - 1)/2)))
 
+    def binder(self):
+        self.canvas.unbind("<Button-1>")
+        self.canvas.bind("<Button-1>", self.create_by_input)
+
     def add_buttons(self):
         self.refresh_canvas()
-        self.canvas.bind("<Button-1>", self.create_by_input)
-        section3 = tk.Label(self.frame, text="Cities and Connections", font='Calibri 12 bold', fg=self.s_color,
-                            bg=self.bg_color)
-        section3.grid(column=0, row=10)
-        city = tk.Radiobutton(self.frame, text="Add City", variable=self.city_or_conn, value=0, bg=self.bg_color).\
-            grid(column=0, row=11)
-        connection = tk.Radiobutton(self.frame, text="Make Connection", variable=self.city_or_conn, value=1,
-                                    bg=self.bg_color).grid(column=0, row=12)
         msg.showinfo(title="Info", message="Insert cities inside the gray frame.")
+
+    def change_map(self):
+        self.canvas.unbind("<Button-1>")
+        self.gonna_move = -1
+        if self.change_type.get() == 0:  # move city
+            self.canvas.bind("<Button-1>", self.move_city)
+        elif self.change_type.get() == 1:  # delete city
+            self.canvas.bind("<Button-1>", self.delete_city)
+        elif self.change_type.get() == 2:  # delete connection
+            self.canvas.bind("<Button-1>", self.delete_connection)
+
+    def find_city(self, x, y):
+        i = 0
+        found = False
+        while i < len(self.ovals) and not found:
+            x1, y1 = self.ovals[i]["coords"]
+            if x1 - 1 < x < x1 + 11 and y1 - 1 < y < y1 + 11:  # it is a city
+                found = True
+            else:
+                i += 1
+        return found, i
+
+    def find_connections(self, index):
+        x, y = self.ovals[index]["coords"]
+        for i in range(len(self.lines)):
+            x1, y1, x2, y2 = self.lines[i]["coords"]
+
+            if distance(x1 - 5, y1 - 5, x, y) == 0 or distance(x2 - 5, y2 - 5, x, y) == 0:
+                # print("Bağlantı var: ", self.lines[i])
+                self.gonna_move_cons.append(i)
+                name = "{},{}-{},{}".format(x1, y1, x2, y2)
+                self.canvas.delete(name + "_line")
+                self.canvas.delete(name + "_text")
+
+    def move_city(self, event):
+        x = event.x
+        y = event.y
+
+        if self.gonna_move == -1:  # city
+            found, index = self.find_city(x, y)
+            if found:
+                self.gonna_move = index
+                self.canvas.delete(self.ovals[self.gonna_move]["name"] + "_oval")
+                self.canvas.delete(self.ovals[self.gonna_move]["name"] + "_text")
+                self.find_connections(index)
+        else:  # destination
+            self.canvas.create_oval(x, y, x + 10, y + 10, fill=self.c_color, outline=self.c_color,
+                                    tag=self.ovals[self.gonna_move]["name"] + "_oval")
+            if self.cities[self.gonna_move] == "Le_Havre":
+                self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text="Le Havre",
+                                        tag=self.cities[self.gonna_move] + "_text")
+            elif self.cities[self.gonna_move] == "Le_Mans":
+                self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text="Le Mans",
+                                        tag=self.cities[self.gonna_move] + "_text")
+            else:
+                self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10",
+                                        text=self.cities[self.gonna_move],
+                                        tag=self.ovals[self.gonna_move]["name"] + "_text")
+            city = {"coords": (x, y), "name": self.cities[self.gonna_move]}
+            old_x, old_y = self.ovals[self.gonna_move]["coords"]
+            self.ovals[self.gonna_move] = city
+
+            for i in range(len(self.gonna_move_cons)):
+                k = self.gonna_move_cons[i]
+                x1, y1, x2, y2 = self.lines[k]["coords"]
+                if old_x + 5 == x2 and old_y + 5 == y2:
+                    x2 = x1
+                    y2 = y1
+
+                j = random.randint(0, len(self.colors) - 1)
+                name = "{},{}-{},{}".format(x + 5, y + 5, x2, y2)
+                self.canvas.create_line(x + 5, y + 5, x2, y2, fill=self.colors[j], tag=name + "_line")
+                self.canvas.create_text(int((x + x2 + 5) / 2), int((y + y2 + 5) / 2), fill=self.colors[j],
+                                        font="Calibri 10", text=str(int(distance(x + 5, y + 5, x2, y2))),
+                                        tag=name + "_text")
+                line = {"from": find_in_ovals(x, y), "to": find_in_ovals(x2 - 5, y2 - 5),
+                        "coords": (x + 5, y + 5, x2, y2)}
+                self.lines[k] = line
+            self.gonna_move = -1
+            self.gonna_move_cons = []
+
+    def delete_city(self, event):
+        x = event.x
+        y = event.y
+
+        found, index = self.find_city(x, y)
+        if found:
+            self.canvas.delete(self.ovals[index]["name"] + "_oval")
+            if self.ovals[index]["name"] == "Le Havre":
+                self.canvas.delete("Le_Havre" + "_text")
+            elif self.ovals[index]["name"] == "Le Mans":
+                self.canvas.delete("Le_Mans" + "_text")
+            else:
+                self.canvas.delete(self.ovals[index]["name"] + "_text")
+            for i in range(index, self.city_count - 1):
+                self.cities[i], self.cities[i+1] = self.cities[i+1], self.cities[i]
+            self.city_count -= 1
+            self.find_connections(index)
+            del self.ovals[index]
+            self.gonna_move_cons.sort(reverse=True)
+            for i in range(len(self.gonna_move_cons)):
+                k = self.gonna_move_cons[i]
+                del self.lines[k]
+                self.conn_count -= 1
+            self.gonna_move_cons = []
+        return
+
+    def delete_connection(self, event):
+        print("Geldim")
+        x = event.x
+        y = event.y
+        obje = self.canvas.find_closest(x, y)
+
+        if len(self.canvas.coords(obje)) == 4 and self.canvas.itemcget(obje, "fill") != "Magenta2":  # it's a line
+            print("It's a line")
+            x1, y1, x2, y2 = self.canvas.coords(obje)
+            print(x1, y1, x2, y2)
+            name = "{},{}-{},{}".format(int(x1), int(y1), int(x2), int(y2))
+            self.canvas.delete(name + "_line")
+            self.canvas.delete(name + "_text")
+            i = 0
+            found = False
+            while i < (len(self.lines)) and not found:
+                x3, y3, x4, y4 = self.lines[i]["coords"]
+                if distance(x1, y1, x3, y3) == 0 and distance(x2, y2, x4, y4) == 0:
+                    del self.lines[i]
+                    print("Deleted.")
+                    found = True
+                else:
+                    i += 1
+        return
 
     def overlap(self, x, y):
         overlap = False
         i = 0
         while i < len(self.ovals) and not overlap:
-            x1, y1 = self.ovals[i]
-            if euclidean_distance(x, y, x1, y1) < 30:
+            x1, y1 = self.ovals[i]["coords"]
+            if distance(x, y, x1, y1) < 30:
                 overlap = True
             i += 1
 
         return overlap
 
-    def create_line(self, x1, y1, x2, y2):
+    def create_line(self, x1, y1, fr, x2, y2, to):
         j = random.randint(0, len(self.colors) - 1)
-
-        self.canvas.create_line(x1 + 5, y1 + 5, x2 + 5, y2 + 5, fill=self.colors[j])
+        name = "{},{}-{},{}".format(x1 + 5, y1 + 5, x2 + 5, y2 + 5)
+        # print(name)
+        self.canvas.create_line(x1 + 5, y1 + 5, x2 + 5, y2 + 5, fill=self.colors[j], tag=name + "_line")
         self.canvas.create_text((x1 + x2 + 10) / 2, (y1 + y2 + 10) / 2, fill=self.colors[j], font="Calibri 10",
-                                text=str(int(euclidean_distance(x1 + 5, y1 + 5, x2 + 5, y2 + 5))))
-        self.lines.append((x1 + 5, y1 + 5, x2 + 5, y2 + 5))
-
-        # uzaklıkları yazdırmayı sonraya saldım
-        '''city1 = self.canvas.find_closest(x1 + 12, y1 + 12)
-        city2 = self.canvas.find_closest(x2 + 12, y2 + 12)
-        print("City1", city1.itemcget(city1, "text"))'''
-
-        # self.city_dict["City1"] = city1.get()
+                                text=str(int(distance(x1 + 5, y1 + 5, x2 + 5, y2 + 5))), tag=name + "_text")
+        line = {"coords": (x1 + 5, y1 + 5, x2 + 5, y2 + 5)}
+        self.lines.append(line)
 
     def create_city(self, x, y):
-        self.canvas.create_oval(x, y, x + 10, y + 10, fill=self.c_color, outline=self.c_color)
-        self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text=self.cities[self.city_count])
-        self.ovals.append((x, y))
+        self.canvas.create_oval(x, y, x + 10, y + 10, fill=self.c_color, outline=self.c_color,
+                                tag=self.cities[self.city_count] + "_oval")
+        if self.cities[self.city_count] == "Le_Havre":
+            self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text="Le Havre",
+                                    tag=self.cities[self.city_count] + "_text")
+        elif self.cities[self.city_count] == "Le_Mans":
+            self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text="Le Mans",
+                                    tag=self.cities[self.city_count] + "_text")
+        else:
+            self.canvas.create_text(x, y + 12, fill=self.h_color, font="Calibri 10", text=self.cities[self.city_count],
+                                    tag=self.cities[self.city_count] + "_text")
+        city = {"coords": (x, y), "name": self.cities[self.city_count]}
+        self.ovals.append(city)
 
     def create_randomly(self):
         self.refresh_canvas()
@@ -233,6 +401,7 @@ class Gui:
             msg.showerror(title="Connection Number Error", message="Number of connections are not in the interval.")
             return
         # make connections
+        # print(self.ovals)
         flags = np.zeros(self.city_total.get())
         i = 0
         while i < len(self.ovals) and self.conn_count < self.entry.get():
@@ -241,9 +410,9 @@ class Gui:
                 if i != to:
                     flags[i] = 1
                     flags[to] = 1
-                    x1, y1 = self.ovals[i]
-                    x2, y2 = self.ovals[to]
-                    self.create_line(x1, y1, x2, y2)
+                    x1, y1 = self.ovals[i]["coords"]
+                    x2, y2 = self.ovals[to]["coords"]
+                    self.create_line(x1, y1, i, x2, y2, to)
                     self.conn_count += 1
                     i += 1
             else:
@@ -253,11 +422,12 @@ class Gui:
             fr = random.randint(0, len(self.ovals) - 1)
             to = random.randint(0, len(self.ovals) - 1)
             if fr != to:
-                x1, y1 = self.ovals[fr]
-                x2, y2 = self.ovals[to]
+                x1, y1 = self.ovals[fr]["coords"]
+                x2, y2 = self.ovals[to]["coords"]
                 if (x1, y1, x2, y2) not in self.lines:
-                    self.create_line(x1, y1, x2, y2)
+                    self.create_line(x1, y1, fr, x2, y2, to)
                     self.conn_count += 1
+        # print(self.lines)
 
     def is_a_city(self, x, y):
         i = 0
@@ -265,7 +435,7 @@ class Gui:
         x1 = 0
         y1 = 0
         while i < len(self.ovals) and not found:
-            x1, y1 = self.ovals[i]
+            x1, y1 = self.ovals[i]["coords"]
             if x1 - 1 < x < x1 + 11 and y1 - 1 < y < y1 + 11:  # it is a city
                 found = True
             i += 1
@@ -292,7 +462,7 @@ class Gui:
                         (x1, y1) = self.selected_cities[0]
                         (x2, y2) = self.selected_cities[1]
                         if (x1, y1, x2, y2) not in self.lines:
-                            self.create_line(x1, y1, x2, y2)
+                            self.create_line(x1, y1, find_in_ovals(x1, y1), x2, y2, find_in_ovals(x2, y2))
                             self.conn_count += 1
                         self.selected_cities = []
             else:
@@ -321,19 +491,22 @@ class Point:
         self.parent = None
 
     def equal(self, other):
-        if euclidean_distance(self.x, self.y, other.x, other.y) == 0:
+        if distance(self.x, self.y, other.x, other.y) == 0:
             return True
 
 
-def euclidean_distance(x1, y1, x2, y2):
-    return sqrt((x1 - x2)**2 + (y1 - y2)**2)
+def distance(x1, y1, x2, y2):
+    if gui.evaluation == 0:  # euclidean distance
+        return sqrt((x1 - x2)**2 + (y1 - y2)**2)
+    else:  # manhattan distance
+        return abs(x1 - x2) + abs(y1 - y2)
 
 
 def find_in_ovals(x, y):
     i = 0
     while i < len(gui.ovals):
-        (x1, y1) = gui.ovals[i]
-        if euclidean_distance(x, y, x1, y1) == 0:
+        (x1, y1) = gui.ovals[i]["coords"]
+        if distance(x, y, x1, y1) == 0:
             return i
         i += 1
     return -1
@@ -343,9 +516,9 @@ def append_to_stack(x, y, end_point, parent_point, index, stack, top, visited, i
     point = Point(x - 5, y - 5)
     point.parent = parent_point
     if index == 0 or index == 1:  # a star and best first search
-        point.h = euclidean_distance(x - 5, y - 5, end_point.x, end_point.y)
+        point.h = distance(x - 5, y - 5, end_point.x, end_point.y)
         if index == 0:  # a star
-            point.g = point.parent.g + euclidean_distance(point.x, point.y, point.parent.x, point.parent.y)
+            point.g = point.parent.g + distance(point.x, point.y, point.parent.x, point.parent.y)
         point.f = point.g + point.h
     stack.append(point)
     top += 1
@@ -357,15 +530,15 @@ def add_neighbours(parent_point, stack, top, visited, end_point, index):
     # find neighbours
     i = 0
     while i < len(gui.lines):
-        x1, y1, x2, y2 = gui.lines[i]
+        x1, y1, x2, y2 = gui.lines[i]["coords"]
         index1 = find_in_ovals(x1 - 5, y1 - 5)
         index2 = find_in_ovals(x2 - 5, y2 - 5)
 
-        if euclidean_distance(x1 - 5, y1 - 5, parent_point.x, parent_point.y) == 0 and visited[index2] == 0:
+        if distance(x1 - 5, y1 - 5, parent_point.x, parent_point.y) == 0 and visited[index2] == 0:
             print("Eklenen nokta: ", x2 - 5, y2 - 5)
             top = append_to_stack(x2, y2, end_point, parent_point, index, stack, top, visited, index2)
 
-        elif euclidean_distance(x2 - 5, y2 - 5, parent_point.x, parent_point.y) == 0 and visited[index1] == 0:
+        elif distance(x2 - 5, y2 - 5, parent_point.x, parent_point.y) == 0 and visited[index1] == 0:
             print("Eklenen nokta: ", x1 - 5, y1 - 5)
             top = append_to_stack(x1, y1, end_point, parent_point, index, stack, top, visited, index1)
 
@@ -408,9 +581,10 @@ def a_star_and_best_first_search(index):
             popped += 1
 
     if found:
-        paint(point, start, max_element)
+        paint(point, start, max_element, popped)
     else:
-        print("Yol yok")
+        message = "Path is not exist."
+        gui.step_label.config(text=message)
     return
 
 
@@ -447,9 +621,10 @@ def depth_first_search():
             popped += 1
 
     if found:
-        paint(point, start, max_element)
+        paint(point, start, max_element, popped)
     else:
-        print("Yol yok")
+        message = "Path is not exist."
+        gui.step_label.config(text=message)
     return
 
 
@@ -488,14 +663,16 @@ def breadth_first_search():
         front += 1
 
     if found:
-        paint(point, start, max_element)
+        paint(point, start, max_element, popped)
     else:
-        print("Yol yok")
+        message = "Path is not exist."
+        gui.step_label.config(text=message)
     return
 
 
-def paint(point, start, max_element):
+def paint(point, start, max_element, pops):
     path = []
+    step_size = 0
     total_distance = 0
     delay = 0.3
     if gui.speed.get() == 0:  # fast
@@ -505,7 +682,14 @@ def paint(point, start, max_element):
 
     while not point.equal(start):
         path.append(point)
+        total_distance += distance(point.x, point.y, point.parent.x, point.parent.y)
         point = point.parent
+        step_size += 1
+
+    message = "Step Size: {}, Distance: {}".format(step_size, total_distance)
+    message2 = "Maximum Stack Size: {}\nNumber of Pops: {}".format(max_element, pops)
+    gui.step_label.config(text=message)
+    gui.output_label.config(text=message2)
 
     for i in range(len(path) - 1, -1, -1):
         gui.canvas.create_line(path[i].x + 5, path[i].y + 5, path[i].parent.x + 5, path[i].parent.y + 5,
@@ -516,15 +700,17 @@ def paint(point, start, max_element):
 
 def run():
     print(gui.conn_count, gui.entry.get())
-    if gui.conn_count < gui.entry.get():
-        msg.showerror(title="Connection Count Error", message="The number of connections is {} but it's supposed "
-                                                              "to be {}.".format(gui.conn_count, gui.entry.get()))
+    if gui.conn_count < gui.city_total.get() - 1:
+        msg.showerror(title="Connection Count Error", message="The number of connections is {} it's less than threshold"
+                                                              " {}.".format(gui.conn_count, gui.city_total.get() - 1))
         return
     elif gui.city_count + 1 < gui.city_total.get():
         msg.showerror(title="City Count Error", message="The number of cities is {} but it's supposed to be {}.".
                       format(gui.city_count, gui.city_total.get()))
         return
-
+    elif gui.conn_count < gui.entry.get() - 1:
+        msg.showinfo(title="Connection Count Info", message="The number connections is {} but it's supposed to be {}."
+                     .format(gui.conn_count, gui.entry.get()))
     if gui.algorithm.get() == 0:  # a *
         a_star_and_best_first_search(0)
     elif gui.algorithm.get() == 1:  # best first search
