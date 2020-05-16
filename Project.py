@@ -4,6 +4,7 @@ import random
 from math import sqrt
 import numpy as np
 import time
+import csv
 
 
 class Gui:
@@ -61,12 +62,12 @@ class Gui:
         section = tk.Label(self.frame, text="Number of Cities", font='Calibri 12 bold', fg=self.s_color,
                            bg=self.bg_color)
         section.grid(column=0, row=1)
-        cities5 = tk.Radiobutton(self.frame, text='5 cities', variable=self.city_total, command=self.set_connections,
-                                 value=5, bg=self.bg_color).grid(column=0, row=2)
-        cities10 = tk.Radiobutton(self.frame, text='10 cities', variable=self.city_total, command=self.set_connections,
-                                  value=10, bg=self.bg_color).grid(column=0, row=3)
-        cities20 = tk.Radiobutton(self.frame, text='20 cities', variable=self.city_total, command=self.set_connections,
-                                  value=20, bg=self.bg_color).grid(column=0, row=4)
+        cities5 = tk.Radiobutton(self.frame, text='5', variable=self.city_total, command=self.set_connections,
+                                 value=5, bg=self.bg_color).grid(column=0, row=2, sticky='w')
+        cities10 = tk.Radiobutton(self.frame, text='10', variable=self.city_total, command=self.set_connections,
+                                  value=10, bg=self.bg_color).grid(column=0, row=2, sticky='n')
+        cities20 = tk.Radiobutton(self.frame, text='20', variable=self.city_total, command=self.set_connections,
+                                  value=20, bg=self.bg_color).grid(column=0, row=2, sticky='e')
         section1 = tk.Label(self.frame, text="Number of Connections", font='Calibri 12 bold', fg=self.s_color,
                             bg=self.bg_color)
         section1.grid(column=0, row=5)
@@ -77,9 +78,9 @@ class Gui:
         section2 = tk.Label(self.frame, text="How to Create", font='Calibri 12 bold', fg=self.s_color, bg=self.bg_color)
         section2.grid(column=0, row=7)
         frame_ran = tk.Radiobutton(self.frame, text='Random', variable=self.input_type, value="Random",
-                                   command=self.create_randomly, bg=self.bg_color).grid(column=0, row=8)
+                                   command=self.create_randomly, bg=self.bg_color).grid(column=0, row=8, sticky='w')
         frame_us = tk.Radiobutton(self.frame, text='User Input', variable=self.input_type, value="User",
-                                  command=self.add_buttons, bg=self.bg_color).grid(column=0, row=9)
+                                  command=self.add_buttons, bg=self.bg_color).grid(column=0, row=8, sticky='e')
         section3 = tk.Label(self.frame, text="Cities and Connections", font='Calibri 12 bold', fg=self.s_color,
                             bg=self.bg_color)
         section3.grid(column=0, row=10)
@@ -192,7 +193,7 @@ class Gui:
             j = random.randint(0, len(self.colors) - 1)
             self.canvas.create_line(x1, y1, x2, y2, fill=self.colors[j])
             self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, fill=self.colors[j], font="Calibri 10",
-                                    text=str(int(distance(x1, y1, x2, y2))))
+                                    text=str(int(distance(x1, y1, x2, y2, 1))))
             self.conn_count += 1
 
     def select_cities(self):
@@ -241,7 +242,7 @@ class Gui:
         for i in range(len(self.lines)):
             x1, y1, x2, y2 = self.lines[i]["coords"]
 
-            if distance(x1 - 5, y1 - 5, x, y) == 0 or distance(x2 - 5, y2 - 5, x, y) == 0:
+            if distance(x1 - 5, y1 - 5, x, y, 0) == 0 or distance(x2 - 5, y2 - 5, x, y, 0) == 0:
                 # print("Bağlantı var: ", self.lines[i])
                 self.gonna_move_cons.append(i)
                 name = "{},{}-{},{}".format(x1, y1, x2, y2)
@@ -287,7 +288,7 @@ class Gui:
                 name = "{},{}-{},{}".format(x + 5, y + 5, x2, y2)
                 self.canvas.create_line(x + 5, y + 5, x2, y2, fill=self.colors[j], tag=name + "_line")
                 self.canvas.create_text(int((x + x2 + 5) / 2), int((y + y2 + 5) / 2), fill=self.colors[j],
-                                        font="Calibri 10", text=str(int(distance(x + 5, y + 5, x2, y2))),
+                                        font="Calibri 10", text=str(int(distance(x + 5, y + 5, x2, y2, 1))),
                                         tag=name + "_text")
                 line = {"from": find_in_ovals(x, y), "to": find_in_ovals(x2 - 5, y2 - 5),
                         "coords": (x + 5, y + 5, x2, y2)}
@@ -338,10 +339,11 @@ class Gui:
             found = False
             while i < (len(self.lines)) and not found:
                 x3, y3, x4, y4 = self.lines[i]["coords"]
-                if distance(x1, y1, x3, y3) == 0 and distance(x2, y2, x4, y4) == 0:
+                if distance(x1, y1, x3, y3, 0) == 0 and distance(x2, y2, x4, y4, 0) == 0:
                     del self.lines[i]
                     print("Deleted.")
                     found = True
+                    self.conn_count -= 1
                 else:
                     i += 1
         return
@@ -351,7 +353,7 @@ class Gui:
         i = 0
         while i < len(self.ovals) and not overlap:
             x1, y1 = self.ovals[i]["coords"]
-            if distance(x, y, x1, y1) < 30:
+            if distance(x, y, x1, y1, 1) < 30:
                 overlap = True
             i += 1
 
@@ -363,7 +365,7 @@ class Gui:
         # print(name)
         self.canvas.create_line(x1 + 5, y1 + 5, x2 + 5, y2 + 5, fill=self.colors[j], tag=name + "_line")
         self.canvas.create_text((x1 + x2 + 10) / 2, (y1 + y2 + 10) / 2, fill=self.colors[j], font="Calibri 10",
-                                text=str(int(distance(x1 + 5, y1 + 5, x2 + 5, y2 + 5))), tag=name + "_text")
+                                text=str(int(distance(x1 + 5, y1 + 5, x2 + 5, y2 + 5, 1))), tag=name + "_text")
         line = {"coords": (x1 + 5, y1 + 5, x2 + 5, y2 + 5)}
         self.lines.append(line)
 
@@ -491,12 +493,12 @@ class Point:
         self.parent = None
 
     def equal(self, other):
-        if distance(self.x, self.y, other.x, other.y) == 0:
+        if distance(self.x, self.y, other.x, other.y, 0) == 0:
             return True
 
 
-def distance(x1, y1, x2, y2):
-    if gui.evaluation == 0:  # euclidean distance
+def distance(x1, y1, x2, y2, want):
+    if gui.evaluation == 0 or want == 1:  # euclidean distance
         return sqrt((x1 - x2)**2 + (y1 - y2)**2)
     else:  # manhattan distance
         return abs(x1 - x2) + abs(y1 - y2)
@@ -506,7 +508,7 @@ def find_in_ovals(x, y):
     i = 0
     while i < len(gui.ovals):
         (x1, y1) = gui.ovals[i]["coords"]
-        if distance(x, y, x1, y1) == 0:
+        if distance(x, y, x1, y1, 0) == 0:
             return i
         i += 1
     return -1
@@ -516,9 +518,9 @@ def append_to_stack(x, y, end_point, parent_point, index, stack, top, visited, i
     point = Point(x - 5, y - 5)
     point.parent = parent_point
     if index == 0 or index == 1:  # a star and best first search
-        point.h = distance(x - 5, y - 5, end_point.x, end_point.y)
+        point.h = distance(x - 5, y - 5, end_point.x, end_point.y, 0)
         if index == 0:  # a star
-            point.g = point.parent.g + distance(point.x, point.y, point.parent.x, point.parent.y)
+            point.g = point.parent.g + distance(point.x, point.y, point.parent.x, point.parent.y, 1)
         point.f = point.g + point.h
     stack.append(point)
     top += 1
@@ -534,12 +536,12 @@ def add_neighbours(parent_point, stack, top, visited, end_point, index):
         index1 = find_in_ovals(x1 - 5, y1 - 5)
         index2 = find_in_ovals(x2 - 5, y2 - 5)
 
-        if distance(x1 - 5, y1 - 5, parent_point.x, parent_point.y) == 0 and visited[index2] == 0:
-            print("Eklenen nokta: ", x2 - 5, y2 - 5)
+        if distance(x1 - 5, y1 - 5, parent_point.x, parent_point.y, 0) == 0 and visited[index2] == 0:
+            # print("Eklenen nokta: ", x2 - 5, y2 - 5)
             top = append_to_stack(x2, y2, end_point, parent_point, index, stack, top, visited, index2)
 
-        elif distance(x2 - 5, y2 - 5, parent_point.x, parent_point.y) == 0 and visited[index1] == 0:
-            print("Eklenen nokta: ", x1 - 5, y1 - 5)
+        elif distance(x2 - 5, y2 - 5, parent_point.x, parent_point.y, 0) == 0 and visited[index1] == 0:
+            # print("Eklenen nokta: ", x1 - 5, y1 - 5)
             top = append_to_stack(x1, y1, end_point, parent_point, index, stack, top, visited, index1)
 
         i += 1
@@ -547,7 +549,7 @@ def add_neighbours(parent_point, stack, top, visited, end_point, index):
     return top
 
 
-def a_star_and_best_first_search(index):
+def a_star_and_best_first_search(index, start_time):
     stack = []
     found = False
     top = 0
@@ -557,7 +559,7 @@ def a_star_and_best_first_search(index):
     point = Point(x, y)
     end = Point(end_x, end_y)
     start = point
-    print("Start {}, {}. End {}, {}".format(start.x, start.y, end.x, end.y))
+    # print("Start {}, {}. End {}, {}".format(start.x, start.y, end.x, end.y))
     point.index = find_in_ovals(x, y)
     stack.append(point)  # source
     visited = np.zeros(gui.city_count)
@@ -567,7 +569,7 @@ def a_star_and_best_first_search(index):
 
     while len(stack) > 0 and not found:
         point = stack.pop(top)
-        print("Çekilen nokta: ", point.x, point.y)
+        # print("Çekilen nokta: ", point.x, point.y)
         top -= 1
         if point.equal(end):
             found = True
@@ -577,18 +579,19 @@ def a_star_and_best_first_search(index):
             stack.sort(key=lambda point: point.f, reverse=True)  # sort max to min by h(n)
             if len(stack) > max_element:
                 max_element = len(stack)
-            print("Stack boyutu:", len(stack))
+            # print("Stack boyutu:", len(stack))
             popped += 1
 
     if found:
-        paint(point, start, max_element, popped)
+        total_distance, step_size = paint(point, start, max_element, popped)
+        return total_distance, step_size, max_element, popped, time.time() - start_time
     else:
         message = "Path is not exist."
         gui.step_label.config(text=message)
-    return
+    return 0, 0, 0, 0, time.time() - start_time
 
 
-def depth_first_search():
+def depth_first_search(start_time):
     stack = []
     found = False
     top = 0
@@ -598,7 +601,7 @@ def depth_first_search():
     point = Point(x, y)
     end = Point(end_x, end_y)
     start = point
-    print("Start {}, {}. End {}, {}".format(start.x, start.y, end.x, end.y))
+    # print("Start {}, {}. End {}, {}".format(start.x, start.y, end.x, end.y))
     point.index = find_in_ovals(x, y)
     stack.append(point)  # source
     visited = np.zeros(gui.city_count)
@@ -608,7 +611,7 @@ def depth_first_search():
 
     while len(stack) > 0 and not found:
         point = stack.pop(top)
-        print("Çekilen nokta: ", point.x, point.y)
+        # print("Çekilen nokta: ", point.x, point.y)
         top -= 1
         if point.equal(end):
             found = True
@@ -617,18 +620,19 @@ def depth_first_search():
             top = add_neighbours(point, stack, top, visited, end, 2)
             if len(stack) > max_element:
                 max_element = len(stack)
-            print("Stack boyutu:", len(stack))
+            # print("Stack boyutu:", len(stack))
             popped += 1
 
     if found:
-        paint(point, start, max_element, popped)
+        total_distance, step_size = paint(point, start, max_element, popped)
+        return total_distance, step_size, max_element, popped, time.time() - start_time
     else:
         message = "Path is not exist."
         gui.step_label.config(text=message)
-    return
+    return 0, 0, 0, 0, time.time() - start_time
 
 
-def breadth_first_search():
+def breadth_first_search(start_time):
     queue = []
     found = False
     rear = 0
@@ -639,7 +643,7 @@ def breadth_first_search():
     point = Point(x, y)
     end = Point(end_x, end_y)
     start = point
-    print("Start {}, {}. End {}, {}".format(start.x, start.y, end.x, end.y))
+    # print("Start {}, {}. End {}, {}".format(start.x, start.y, end.x, end.y))
     point.index = find_in_ovals(x, y)
     queue.append(point)  # source
     visited = np.zeros(gui.city_count)
@@ -649,7 +653,7 @@ def breadth_first_search():
 
     while len(queue) > 0 and not found:
         point = queue[front]
-        print("Çekilen nokta: ", point.x, point.y)
+        # print("Çekilen nokta: ", point.x, point.y)
         rear -= 1
         if point.equal(end):
             found = True
@@ -658,16 +662,17 @@ def breadth_first_search():
             top = add_neighbours(point, queue, rear, visited, end, 2)
             if len(queue) > max_element:
                 max_element = len(queue)
-            print("Stack boyutu:", len(queue))
+            # print("Stack boyutu:", len(queue))
             popped += 1
         front += 1
 
     if found:
-        paint(point, start, max_element, popped)
+        total_distance, step_size = paint(point, start, max_element, popped)
+        return total_distance, step_size, max_element, popped, time.time() - start_time
     else:
         message = "Path is not exist."
         gui.step_label.config(text=message)
-    return
+    return 0, 0, 0, 0, time.time() - start_time
 
 
 def paint(point, start, max_element, pops):
@@ -682,11 +687,11 @@ def paint(point, start, max_element, pops):
 
     while not point.equal(start):
         path.append(point)
-        total_distance += distance(point.x, point.y, point.parent.x, point.parent.y)
+        total_distance += distance(point.x, point.y, point.parent.x, point.parent.y, 1)
         point = point.parent
         step_size += 1
 
-    message = "Step Size: {}, Distance: {}".format(step_size, total_distance)
+    message = "Step Size: {}, Distance: {}".format(step_size, int(total_distance))
     message2 = "Maximum Stack Size: {}\nNumber of Pops: {}".format(max_element, pops)
     gui.step_label.config(text=message)
     gui.output_label.config(text=message2)
@@ -697,9 +702,10 @@ def paint(point, start, max_element, pops):
         gui.window.update()
         time.sleep(delay)
 
+    return total_distance, step_size
+
 
 def run():
-    print(gui.conn_count, gui.entry.get())
     if gui.conn_count < gui.city_total.get() - 1:
         msg.showerror(title="Connection Count Error", message="The number of connections is {} it's less than threshold"
                                                               " {}.".format(gui.conn_count, gui.city_total.get() - 1))
@@ -711,21 +717,106 @@ def run():
     elif gui.conn_count < gui.entry.get() - 1:
         msg.showinfo(title="Connection Count Info", message="The number connections is {} but it's supposed to be {}."
                      .format(gui.conn_count, gui.entry.get()))
+    start = time.time()
     if gui.algorithm.get() == 0:  # a *
-        a_star_and_best_first_search(0)
+        total_distance, step_size, max_element, popped, total_time = a_star_and_best_first_search(0, start)
     elif gui.algorithm.get() == 1:  # best first search
-        a_star_and_best_first_search(1)
+        total_distance, step_size, max_element, popped, total_time = a_star_and_best_first_search(1, start)
     elif gui.algorithm.get() == 2:
-        depth_first_search()
+        total_distance, step_size, max_element, popped, total_time = depth_first_search(start)
     elif gui.algorithm.get() == 3:
-        breadth_first_search()
+        total_distance, step_size, max_element, popped, total_time = breadth_first_search(start)
     else:
         msg.showerror(title="Algorithm Selection Error", message="You did not choose the algorithm.")
 
-    return
+    return total_distance, step_size, max_element, popped, total_time
+
+
+def select_indices():
+    index1 = random.randint(0, gui.city_total.get() - 1)
+    index2 = index1
+
+    neighbours = []
+    i = 0
+    x, y = gui.ovals[index1]["coords"]
+    while i < len(gui.lines):  # find neighbours
+        x1, y1, x2, y2 = gui.lines[i]["coords"]
+        if distance(x, y, x1 - 5, y1 - 5, 0) == 0:
+            neighbours.append((x2 - 5, y2 - 5))
+        elif distance(x, y, x2 - 5, y2 - 5, 0) == 0:
+            neighbours.append((x1 - 5, y1 - 5))
+        i += 1
+
+    index2 = random.randint(0, gui.city_total.get() - 1)
+    x1, y1 = gui.ovals[index2]["coords"]
+    while index1 == index2 or (x1, y1) in neighbours:  # işimizi şansa bırakmıyoruz
+        index2 = random.randint(0, gui.city_total.get() - 1)
+        x1, y1 = gui.ovals[index2]["coords"]
+    print("Selected: ", x, y, x1, y1)
+    gui.selected_cities.append((x, y))
+    gui.selected_cities.append((x1, y1))
+
+
+def test():
+    gui.city_total.set(20)
+    gui.entry.set(40)
+
+    with open('test_outputs.csv', 'w', newline='') as file:
+        fieldnames = ['algorithm', 'distance', "step size", "max element", "popped", "time"]
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for i in range(100):
+            print("Adım:", i)
+            gui.create_randomly()
+            gui.selected_cities = []
+            select_indices()
+            accepted = 0
+            for j in range(6):
+                if j == 0:
+                    gui.algorithm.set(0)
+                    gui.evaluation.set(0)
+                    total_distance, step_size, max_element, popped, total_time = run()
+                    accepted = total_distance
+                    writer.writerow({"algorithm": "A* with Euclidean", "distance": accepted / total_distance , "step size": step_size,
+                                  "max element": max_element, "popped": popped, "time": total_time})
+
+                elif j == 1:
+                    gui.algorithm.set(0)
+                    gui.evaluation.set(1)
+                    total_distance, step_size, max_element, popped, total_time = run()
+                    writer.writerow({"algorithm": "A* with Manhattan", "distance": accepted / total_distance , "step size": step_size,
+                                     "max element": max_element, "popped": popped, "time": total_time})
+
+                elif j == 2:
+                    gui.algorithm.set(1)
+                    gui.evaluation.set(0)
+                    total_distance, step_size, max_element, popped, total_time = run()
+                    writer.writerow({"algorithm": "BFS with Euclidean", "distance": accepted / total_distance,
+                                     "step size": step_size, "max element": max_element, "popped": popped, "time": total_time})
+
+                elif j == 3:
+                    gui.algorithm.set(1)
+                    gui.evaluation.set(1)
+                    total_distance, step_size, max_element, popped, total_time = run()
+                    writer.writerow({"algorithm": "BFS with Manhattan", "distance": accepted / total_distance, "step size": step_size,
+                                     "max element": max_element, "popped": popped, "time": total_time})
+
+                elif j == 4:
+                    gui.algorithm.set(2)
+                    total_distance, step_size, max_element, popped, total_time = run()
+                    writer.writerow({"algorithm": "DFS", "distance": accepted / total_distance, "step size": step_size,
+                                     "max element": max_element, "popped": popped, "time": total_time})
+
+                elif j == 5:
+                    gui.algorithm.set(3)
+                    total_distance, step_size, max_element, popped, total_time = run()
+                    writer.writerow({"algorithm": "Breadth FS", "distance": accepted / total_distance, "step size": step_size,
+                                     "max element": max_element, "popped": popped, "time": total_time})
 
 
 if __name__ == "__main__":
     root = tk.Tk()
     gui = Gui()
+    # test()
     root.mainloop()
