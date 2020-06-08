@@ -1,5 +1,5 @@
 # Find Path in Map with Heuristic Search Algorithms 
-Finding path in a map which consist of cities using A*, Best First Search, Breadth First Seacrh and Depth First Search. I develeoped GUI with Python Tkinter library. 
+Finding path in a map which consist of cities using A*, Best First Search, Breadth First Search and Depth First Search. I developed GUI with Python Tkinter library. 
 
 ![Map with 10 cities and 12 connections.](https://github.com/fzehracetin/Find-Path-in-Map-with-Search-Algorithms-/blob/master/map.png)
 
